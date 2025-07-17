@@ -1,0 +1,261 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Add New Cheque | ChequeFlow Pro</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #5e35b1;
+      --primary-light: #7e57c2;
+      --secondary: #26a69a;
+      --accent: #ff7043;
+      --dark: #263238;
+      --light: #eceff1;
+      --card-bg: #ffffff;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #f5f7ff 0%, #f0f2fa 100%);
+      font-family: 'Manrope', sans-serif;
+      min-height: 100vh;
+      color: var(--dark);
+    }
+    
+    /* Glassmorphism Card */
+    .form-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+      overflow: hidden;
+    }
+    
+    /* Premium Title */
+    .form-title {
+      font-weight: 700;
+      color: var(--primary);
+      position: relative;
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .form-title::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 60px;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+      border-radius: 2px;
+    }
+    
+    /* Form Styling */
+    .form-label {
+      font-weight: 600;
+      color: var(--dark);
+      margin-bottom: 0.5rem;
+    }
+    
+    .form-control, .form-select {
+      border-radius: 12px;
+      border: 1px solid rgba(0,0,0,0.08);
+      padding: 0.65rem 1rem;
+      font-size: 0.95rem;
+      box-shadow: none;
+      transition: all 0.3s ease;
+      background-color: rgba(255,255,255,0.7);
+    }
+    
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(94, 53, 177, 0.15);
+    }
+    
+    /* Checkbox Styling */
+    .form-check-input {
+      width: 1.2em;
+      height: 1.2em;
+      margin-top: 0.1em;
+      border: 2px solid var(--primary-light);
+    }
+    
+    .form-check-input:checked {
+      background-color: var(--primary);
+      border-color: var(--primary);
+    }
+    
+    .form-check-input:focus {
+      box-shadow: 0 0 0 0.25rem rgba(94, 53, 177, 0.25);
+    }
+    
+    .form-check-label {
+      margin-left: 0.5rem;
+      font-weight: 500;
+    }
+    
+    /* Premium Button */
+    .btn-premium {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-weight: 600;
+      padding: 0.75rem 2rem;
+      box-shadow: 0 4px 15px rgba(94, 53, 177, 0.3);
+      transition: all 0.3s ease;
+      width: 100%;
+      margin-top: 1.5rem;
+    }
+    
+    .btn-premium:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(94, 53, 177, 0.4);
+      color: white;
+    }
+    
+    /* Form Group Styling */
+    .form-group {
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+    
+    /* File Input Customization */
+    .custom-file-label {
+      border-radius: 12px;
+      border: 1px dashed rgba(0,0,0,0.1);
+      background: rgba(255,255,255,0.5);
+      padding: 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .custom-file-label:hover {
+      border-color: var(--primary-light);
+      background: rgba(94, 53, 177, 0.05);
+    }
+    
+    /* Form Layout */
+    @media (min-width: 768px) {
+      .form-container {
+        max-width: 700px;
+        margin: 0 auto;
+      }
+    }
+    
+    /* Animation */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .form-group {
+      animation: fadeIn 0.4s ease forwards;
+    }
+    
+    .form-group:nth-child(1) { animation-delay: 0.1s; }
+    .form-group:nth-child(2) { animation-delay: 0.2s; }
+    .form-group:nth-child(3) { animation-delay: 0.3s; }
+    /* Continue with more delays as needed */
+
+    .radio-group {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 0.2rem;
+      margin-bottom: 0.2rem;
+    }
+    .radio-label {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 1rem;
+      color: var(--dark);
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .radio-label input[type="radio"] {
+      accent-color: var(--primary);
+      width: 1.1em;
+      height: 1.1em;
+      margin-right: 0.2em;
+    }
+  </style>
+</head>
+<body>
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="form-card p-4 p-md-5">
+        <h3 class="form-title">
+          <i class="fas fa-file-invoice-dollar me-2"></i>Add New Cheque
+        </h3>
+        <form method="post" enctype="multipart/form-data" class="form-container">
+          {% csrf_token %}
+          
+          {% for field in form %}
+          <div class="form-group">
+            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+            {% if field.name == 'bill_available' or field.name == 'shared_on_group' %}
+              <div class="radio-group">
+                {% for subwidget in field %}
+                  <label class="radio-label">
+                    {{ subwidget.tag }} {{ subwidget.choice_label }}
+                  </label>
+                {% endfor %}
+              </div>
+            {% elif field.field.widget.input_type == 'select' %}
+              <select class="form-select" id="{{ field.id_for_label }}" name="{{ field.name }}">
+                {% for value, text in field.field.choices %}
+                  <option value="{{ value }}" {% if field.value == value %}selected{% endif %}>{{ text }}</option>
+                {% endfor %}
+              </select>
+            {% elif field.field.widget.input_type == 'file' %}
+              <div class="custom-file">
+                <input type="file" class="form-control" id="{{ field.id_for_label }}" name="{{ field.name }}">
+                <div class="custom-file-label">Choose file</div>
+              </div>
+            {% else %}
+              <input type="{{ field.field.widget.input_type }}" 
+                     class="form-control" 
+                     id="{{ field.id_for_label }}" 
+                     name="{{ field.name }}" 
+                     value="{{ field.value|default_if_none:'' }}"
+                     placeholder="{{ field.field.widget.attrs.placeholder|default:'' }}">
+            {% endif %}
+            {% if field.help_text %}
+              <small class="form-text text-muted">{{ field.help_text }}</small>
+            {% endif %}
+            {% for error in field.errors %}
+              <div class="invalid-feedback d-block">{{ error }}</div>
+            {% endfor %}
+          </div>
+          {% endfor %}
+          
+          <button type="submit" class="btn btn-premium">
+            <i class="fas fa-paper-plane me-2"></i> Submit Cheque
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // File input label update
+  document.querySelectorAll('input[type="file"]').forEach(input => {
+    input.addEventListener('change', function(e) {
+      const fileName = e.target.files[0] ? e.target.files[0].name : 'Choose file';
+      this.nextElementSibling.textContent = fileName;
+    });
+  });
+</script>
+</body>
+</html>

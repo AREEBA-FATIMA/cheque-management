@@ -1,0 +1,352 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChequeFlow Pro</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #5e35b1;
+      --primary-light: #7e57c2;
+      --secondary: #26a69a;
+      --accent: #ff7043;
+      --dark: #263238;
+      --light: #eceff1;
+      --success: #66bb6a;
+      --warning: #ffa726;
+      --danger: #ef5350;
+      --card-bg: #ffffff;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #f5f7ff 0%, #f0f2fa 100%);
+      font-family: 'Manrope', sans-serif;
+      min-height: 100vh;
+      color: var(--dark);
+    }
+    
+    /* Glassmorphism Header */
+    .dashboard-header {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+      padding: 1.5rem 2rem;
+      margin-bottom: 2.5rem;
+    }
+    
+    /* Premium Card Design */
+    .cheque-card {
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+      border: none;
+      border-radius: 16px;
+      overflow: hidden;
+      background: var(--card-bg);
+      box-shadow: 0 10px 20px -5px rgba(94, 53, 177, 0.1);
+      position: relative;
+      z-index: 1;
+    }
+    
+    .cheque-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(94, 53, 177, 0.03) 0%, rgba(255, 255, 255, 0) 100%);
+      z-index: -1;
+    }
+    
+    .cheque-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 30px -5px rgba(94, 53, 177, 0.2);
+    }
+    
+    /* Status Indicator Ribbon */
+    .status-ribbon {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 6px;
+      height: 100%;
+      transition: all 0.3s ease;
+    }
+    
+    .completed .status-ribbon { background: var(--success); }
+    .in_progress .status-ribbon { background: var(--warning); }
+    .blocked .status-ribbon { background: var(--danger); }
+    .not_started .status-ribbon { background: var(--light); }
+    
+    /* Badge Design */
+    .status-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.35rem 0.8rem;
+      border-radius: 12px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
+    }
+    
+    .badge-completed {
+      background: rgba(102, 187, 106, 0.15);
+      color: var(--success);
+    }
+    
+    .badge-in_progress {
+      background: rgba(255, 167, 38, 0.15);
+      color: var(--warning);
+    }
+    
+    .badge-blocked {
+      background: rgba(239, 83, 80, 0.15);
+      color: var(--danger);
+    }
+    
+    .badge-not_started {
+      background: rgba(236, 239, 241, 0.5);
+      color: var(--dark);
+    }
+    
+    /* Custom Title */
+    .page-title {
+      font-weight: 700;
+      color: var(--primary);
+      position: relative;
+      display: inline-block;
+      padding-left: 1.5rem;
+    }
+    
+    .page-title::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 8px;
+      height: 32px;
+      background: var(--primary);
+      border-radius: 4px;
+    }
+    
+    /* Premium Button */
+    .btn-premium {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-weight: 600;
+      padding: 0.5rem 1.5rem;
+      box-shadow: 0 4px 15px rgba(94, 53, 177, 0.3);
+      transition: all 0.3s ease;
+    }
+    
+    .btn-premium:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(94, 53, 177, 0.4);
+      color: white;
+    }
+    
+    /* Custom Select */
+    .form-select {
+      border-radius: 12px;
+      border: 1px solid rgba(0,0,0,0.08);
+      padding: 0.65rem 1rem;
+      font-size: 0.9rem;
+      box-shadow: none;
+      transition: all 0.3s ease;
+      background-color: rgba(255,255,255,0.7);
+    }
+    
+    .form-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(94, 53, 177, 0.15);
+    }
+    
+    /* Amount Display */
+    .amount-display {
+      font-size: 1.4rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
+      margin: 0.5rem 0;
+    }
+    
+    /* Meta Items */
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: #607d8b;
+      margin-right: 1rem;
+    }
+    
+    .meta-item i {
+      color: var(--primary-light);
+      font-size: 0.9rem;
+    }
+    
+    /* Hidden State */
+    .hidden {
+      transform: scale(0.9);
+      opacity: 0;
+      height: 0;
+      padding: 0;
+      margin: 0;
+      border: 0;
+      transition: all 0.4s ease;
+      pointer-events: none;
+    }
+    
+    /* Responsive Grid */
+    @media (min-width: 992px) {
+      .cheque-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+        gap: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container py-5">
+  <div class="dashboard-header">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h1 class="page-title mb-1">ChequeFlow Pro</h1>
+        <p class="text-muted mb-0">Manage your financial transactions with precision</p>
+      </div>
+      <a href="{% url 'add_cheque' %}" class="btn btn-premium">
+        <i class="fas fa-plus-circle me-2"></i>New Cheque
+      </a>
+    </div>
+
+    <!-- Premium Filters -->
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label fw-medium text-primary">Project</label>
+        <select id="projectFilter" class="form-select">
+          <option value="all" selected>All Projects</option>
+          {% for project in projects %}
+            <option value="{{ project.name }}">{{ project.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-medium text-primary">Status</label>
+        <select id="statusFilter" class="form-select">
+          <option value="all" selected>All Statuses</option>
+          <option value="not_started">Not Started</option>
+          <option value="in_progress">In Progress</option>
+          <option value="blocked">Blocked</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-medium text-primary">Approved By</label>
+        <select id="approverFilter" class="form-select">
+          <option value="all" selected>All Approvers</option>
+          <option value="Head Sir">Head Sir</option>
+          <option value="Madam">Madam</option>
+          <option value="Saad">Saad</option>
+          <option value="Abdullah">Abdullah</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Premium Cheque Cards -->
+  <div class="cheque-grid" id="chequeContainer">
+    {% for cheque in cheques %}
+    <a href="{% url 'cheque_detail' cheque.id %}" style="text-decoration:none;color:inherit;">
+    <div class="cheque-card mb-4 {{ cheque.status }}" 
+         data-project="{{ cheque.project.name }}"
+         data-status="{{ cheque.status }}"
+         data-approver="{{ cheque.approved_by }}">
+      <div class="card-body p-4 position-relative">
+        <div class="status-ribbon"></div>
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <h5 class="card-title fw-bold mb-0" style="max-width: 70%;">{{ cheque.description }}</h5>
+          <span class="status-badge badge-{{ cheque.status }}">
+            {{ cheque.get_status_display }}
+          </span>
+        </div>
+        
+        <p class="card-text">
+          <span class="amount-display">Rs. {{ cheque.amount }}</span><br>
+          <small class="text-muted">Cheque #{{ cheque.cheque_number }}</small>
+        </p>
+        
+        <div class="d-flex flex-wrap mt-3 pt-2 border-top">
+          <div class="meta-item">
+            <i class="fas fa-layer-group"></i>
+            <span>{{ cheque.project.name }}</span>
+          </div>
+          <div class="meta-item">
+            <i class="fas fa-user-tie"></i>
+            <span>{{ cheque.approved_by }}</span>
+          </div>
+          <div class="meta-item">
+            <i class="fas fa-calendar-alt"></i>
+            <span>{{ cheque.cheque_date }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const filters = {
+      project: document.getElementById('projectFilter'),
+      status: document.getElementById('statusFilter'),
+      approver: document.getElementById('approverFilter')
+    };
+    
+    const chequeCards = document.querySelectorAll('.cheque-card');
+    
+    function applyFilters() {
+      const filtersActive = {
+        project: filters.project.value !== 'all',
+        status: filters.status.value !== 'all',
+        approver: filters.approver.value !== 'all'
+      };
+      
+      chequeCards.forEach(card => {
+        const matchesProject = !filtersActive.project || card.dataset.project === filters.project.value;
+        const matchesStatus = !filtersActive.status || card.dataset.status === filters.status.value;
+        const matchesApprover = !filtersActive.approver || card.dataset.approver === filters.approver.value;
+        
+        if (matchesProject && matchesStatus && matchesApprover) {
+          card.classList.remove('hidden');
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+    }
+    
+    // Add event listeners
+    Object.values(filters).forEach(filter => {
+      filter.addEventListener('change', applyFilters);
+    });
+    
+    // Initialize
+    applyFilters();
+  });
+</script>
+</body>
+</html>
