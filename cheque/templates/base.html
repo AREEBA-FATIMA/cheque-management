@@ -7,6 +7,9 @@
 </head>
 <body>
     <div class="container mt-4">
+        {% if user.is_authenticated %}
+            <a href="{% url 'logout' %}" class="container mt-2 mb-2">Logout</a>
+        {% endif %}
         {% block content %}
         {% endblock %}
     </div>

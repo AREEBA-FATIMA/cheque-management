@@ -86,7 +86,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'cheque-tracker',
         'USER': 'root',
-        'PASSWORD': 'password',
+        'PASSWORD': 'ROOT8@123',
         'HOST': 'localhost',
         'PORT': '3306',
     }
@@ -137,3 +137,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Session will expire after 20 minutes (1200 seconds)
+SESSION_COOKIE_AGE = 1200  # 20 minutes
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Optional: logout when browser closes
+
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'
+
+SESSION_SAVE_EVERY_REQUEST = True
