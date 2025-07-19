@@ -4,6 +4,7 @@ from .forms import ChequeForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
+import os
 
 @login_required
 def cheque_dashboard(request):
@@ -25,7 +26,11 @@ def add_cheque(request):
 @login_required
 def cheque_detail(request, cheque_id):
     cheque = get_object_or_404(Cheque, id=cheque_id)
-    return render(request, 'cheque_detail.html', {'cheque': cheque})
+    bill_is_image = False
+    if cheque.bill_attachment:
+        ext = os.path.splitext(cheque.bill_attachment.name)[1].lower()
+        bill_is_image = ext in ['.jpg', '.jpeg', '.png', '.webp']
+    return render(request, 'cheque_detail.html', {'cheque': cheque, 'bill_is_image': bill_is_image})
 
 def custom_login(request):
     if request.user.is_authenticated:
@@ -46,3 +51,24 @@ def custom_login(request):
 def custom_logout(request):
     logout(request)
     return redirect('login')
+
+
+def edit_cheque(request, cheque_id):
+    cheque = get_object_or_404(Cheque, id=cheque_id)
+    if request.method == 'POST':
+        form = ChequeForm(request.POST, instance=cheque)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Cheque updated successfully!')
+            return redirect('cheque_detail', cheque_id=cheque.id)
+    else:
+        form = ChequeForm(instance=cheque)
+    return render(request, 'edit_cheque.html', {'form': form, 'cheque': cheque})
+
+def delete_cheque(request, cheque_id):
+    cheque = get_object_or_404(Cheque, id=cheque_id)
+    if request.method == 'POST':
+        cheque.delete()
+        messages.success(request, 'Cheque deleted successfully!')
+        return redirect('cheque_dashboard')
+    return redirect('cheque_detail', cheque_id=cheque.id)

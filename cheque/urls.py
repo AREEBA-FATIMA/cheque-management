@@ -1,11 +1,13 @@
 # urls.py
 from django.urls import path
-from .views import cheque_dashboard, add_cheque, cheque_detail, custom_login, custom_logout
+from . import views
 
 urlpatterns = [
-    path('', cheque_dashboard, name='cheque_dashboard'),
-    path('add/', add_cheque, name='add_cheque'),
-    path('cheque/<int:cheque_id>/', cheque_detail, name='cheque_detail'),
-    path('login/', custom_login, name='login'),
-    path('logout/', custom_logout, name='logout'),
+    path('', views.cheque_dashboard, name='cheque_dashboard'),
+    path('add/', views.add_cheque, name='add_cheque'),
+    path('cheque/<int:cheque_id>/', views.cheque_detail, name='cheque_detail'),
+    path('login/', views.custom_login, name='login'),
+    path('logout/', views.custom_logout, name='logout'),
+    path('cheques/<int:cheque_id>/edit/', views.edit_cheque, name='edit_cheque'),
+    path('cheques/<int:cheque_id>/delete/', views.delete_cheque, name='delete_cheque'),
 ]

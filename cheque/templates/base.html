@@ -8,10 +8,89 @@
 <body>
     <div class="container mt-4">
         {% if user.is_authenticated %}
-            <a href="{% url 'logout' %}" class="container mt-2 mb-2">Logout</a>
+            <a href="{% url 'logout' %}" class="logout-btn mt-2 mb-3"> <i class="fas fa-sign-out-alt"></i>Logout</a>
         {% endif %}
         {% block content %}
         {% endblock %}
+        {% block error_404 %}{% endblock %}
     </div>
+<style>
+  .logout-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #ef5350;
+    color: #fff !important;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 1.25rem;
+    font-weight: 500;
+    font-size: 1rem;
+    text-decoration: none;
+    box-shadow: 0 2px 6px rgba(239, 83, 80, 0.15);
+    transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+  }
+  .logout-btn:hover {
+    background: #d32f2f;
+    color: #fff;
+    transform: translateY(-2px) scale(1.04);
+    box-shadow: 0 4px 12px rgba(239, 83, 80, 0.18);
+    text-decoration: none;
+  }
+  .error-404-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    text-align: center;
+    padding: 2rem 1rem;
+  }
+  .error-404-icon {
+    font-size: 4rem;
+    color: #ef5350;
+    margin-bottom: 1.2rem;
+    animation: shake404 0.7s cubic-bezier(.36,.07,.19,.97) both;
+  }
+  @keyframes shake404 {
+    10%, 90% { transform: translateX(-1px); }
+    20%, 80% { transform: translateX(2px); }
+    30%, 50%, 70% { transform: translateX(-4px); }
+    40%, 60% { transform: translateX(4px); }
+  }
+  .error-404-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ef5350;
+    margin-bottom: 0.5rem;
+  }
+  .error-404-message {
+    color: #607d8b;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+  }
+  .error-404-btn {
+    background: #5e35b1;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 1.5rem;
+    font-weight: 500;
+    font-size: 1rem;
+    text-decoration: none;
+    box-shadow: 0 2px 6px rgba(94, 53, 177, 0.15);
+    transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .error-404-btn:hover {
+    background: #7e57c2;
+    color: #fff;
+    transform: translateY(-2px) scale(1.04);
+    box-shadow: 0 4px 12px rgba(94, 53, 177, 0.18);
+    text-decoration: none;
+  }
+</style>
 </body>
 </html> 

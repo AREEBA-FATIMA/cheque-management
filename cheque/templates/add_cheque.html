@@ -16,6 +16,8 @@
       --dark: #263238;
       --light: #eceff1;
       --card-bg: #ffffff;
+      --error: #ef5350;
+      --success: #66bb6a;
     }
     
     body {
@@ -61,6 +63,9 @@
       font-weight: 600;
       color: var(--dark);
       margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     
     .form-control, .form-select {
@@ -73,9 +78,30 @@
       background-color: rgba(255,255,255,0.7);
     }
     
+    /* Error State */
+    .is-invalid {
+      border-color: var(--error) !important;
+      background-image: none;
+      padding-right: 1rem;
+    }
+    
+    .is-invalid:focus {
+      box-shadow: 0 0 0 3px rgba(239, 83, 80, 0.15) !important;
+    }
+    
     .form-control:focus, .form-select:focus {
       border-color: var(--primary-light);
       box-shadow: 0 0 0 3px rgba(94, 53, 177, 0.15);
+    }
+    
+    /* Error Messages */
+    .invalid-feedback {
+      display: block;
+      color: var(--error);
+      font-size: 0.85rem;
+      margin-top: 0.25rem;
+      padding-left: 0.5rem;
+      animation: fadeIn 0.3s ease;
     }
     
     /* Checkbox Styling */
@@ -84,6 +110,10 @@
       height: 1.2em;
       margin-top: 0.1em;
       border: 2px solid var(--primary-light);
+    }
+    
+    .form-check-input.is-invalid {
+      border-color: var(--error);
     }
     
     .form-check-input:checked {
@@ -127,6 +157,16 @@
     }
     
     /* File Input Customization */
+    .custom-file {
+      position: relative;
+    }
+    
+    .custom-file-input {
+      opacity: 0;
+      position: absolute;
+      z-index: -1;
+    }
+    
     .custom-file-label {
       border-radius: 12px;
       border: 1px dashed rgba(0,0,0,0.1);
@@ -135,11 +175,18 @@
       text-align: center;
       cursor: pointer;
       transition: all 0.3s ease;
+      display: block;
+      width: 100%;
     }
     
     .custom-file-label:hover {
       border-color: var(--primary-light);
       background: rgba(94, 53, 177, 0.05);
+    }
+    
+    .custom-file-label.is-invalid {
+      border-color: var(--error);
+      color: var(--error);
     }
     
     /* Form Layout */
@@ -163,14 +210,15 @@
     .form-group:nth-child(1) { animation-delay: 0.1s; }
     .form-group:nth-child(2) { animation-delay: 0.2s; }
     .form-group:nth-child(3) { animation-delay: 0.3s; }
-    /* Continue with more delays as needed */
-
+    
+    /* Radio Group Styling */
     .radio-group {
       display: flex;
       gap: 1.5rem;
       margin-top: 0.2rem;
       margin-bottom: 0.2rem;
     }
+    
     .radio-label {
       display: flex;
       align-items: center;
@@ -180,15 +228,85 @@
       font-weight: 500;
       cursor: pointer;
     }
-    .radio-label input[type="radio"] {
+    
+    .radio-input {
       accent-color: var(--primary);
       width: 1.1em;
       height: 1.1em;
       margin-right: 0.2em;
     }
+    
+    .radio-input.is-invalid {
+      accent-color: var(--error);
+    }
+    
+    /* Form Help Text */
+    .form-text {
+      font-size: 0.85rem;
+      color: var(--text-light);
+      margin-top: 0.25rem;
+      padding-left: 0.5rem;
+    }
+    
+    /* Alert Messages */
+    .alert-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      max-width: 400px;
+    }
+    
+    .alert {
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      border: none;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      animation: slideIn 0.3s ease forwards;
+    }
+    
+    .alert-danger {
+      background-color: rgba(239, 83, 80, 0.9);
+      color: white;
+    }
+    
+    .alert-success {
+      background-color: rgba(102, 187, 106, 0.9);
+      color: white;
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
   </style>
 </head>
 <body>
+<!-- Alert Container for Form Errors -->
+<div class="alert-container">
+  {% if form.errors %}
+  <div class="alert alert-danger">
+    <i class="fas fa-exclamation-circle"></i>
+    <div>
+      <strong>Form Errors</strong>
+      <div>Please correct the errors below</div>
+    </div>
+  </div>
+  {% endif %}
+  
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">
+        <i class="fas {% if message.tags == 'success' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %}"></i>
+        <div>{{ message }}</div>
+      </div>
+    {% endfor %}
+  {% endif %}
+</div>
+
 <div class="container py-5">
   <div class="row justify-content-center">
     <div class="col-lg-8">
@@ -196,45 +314,77 @@
         <h3 class="form-title">
           <i class="fas fa-file-invoice-dollar me-2"></i>Add New Cheque
         </h3>
-        <form method="post" enctype="multipart/form-data" class="form-container">
+        <form method="post" enctype="multipart/form-data" class="form-container" novalidate>
           {% csrf_token %}
           
           {% for field in form %}
           <div class="form-group">
-            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+            <label for="{{ field.id_for_label }}" class="form-label">
+              {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
+              {{ field.label }}
+            </label>
+            
             {% if field.name == 'bill_available' or field.name == 'shared_on_group' %}
               <div class="radio-group">
-                {% for subwidget in field %}
+                {% for choice in field %}
                   <label class="radio-label">
-                    {{ subwidget.tag }} {{ subwidget.choice_label }}
+                    <input 
+                      type="radio" 
+                      id="{{ choice.id_for_label }}" 
+                      name="{{ field.name }}" 
+                      value="{{ choice.data.value }}" 
+                      class="radio-input {% if field.errors %}is-invalid{% endif %}"
+                      {% if choice.data.selected %}checked{% endif %}>
+                    {{ choice.choice_label }}
                   </label>
                 {% endfor %}
               </div>
             {% elif field.field.widget.input_type == 'select' %}
-              <select class="form-select" id="{{ field.id_for_label }}" name="{{ field.name }}">
+              <select 
+                class="form-select {% if field.errors %}is-invalid{% endif %}" 
+                id="{{ field.id_for_label }}" 
+                name="{{ field.name }}"
+                {% if field.field.required %}required{% endif %}>
                 {% for value, text in field.field.choices %}
                   <option value="{{ value }}" {% if field.value == value %}selected{% endif %}>{{ text }}</option>
                 {% endfor %}
               </select>
             {% elif field.field.widget.input_type == 'file' %}
               <div class="custom-file">
-                <input type="file" class="form-control" id="{{ field.id_for_label }}" name="{{ field.name }}">
-                <div class="custom-file-label">Choose file</div>
+                <input 
+                  type="file" 
+                  class="form-control custom-file-input {% if field.errors %}is-invalid{% endif %}" 
+                  id="{{ field.id_for_label }}" 
+                  name="{{ field.name }}"
+                  {% if field.field.required %}required{% endif %}>
+                <label 
+                  class="custom-file-label {% if field.errors %}is-invalid{% endif %}" 
+                  for="{{ field.id_for_label }}">
+                  {{ field.value|default:"Choose file" }}
+                </label>
               </div>
             {% else %}
-              <input type="{{ field.field.widget.input_type }}" 
-                     class="form-control" 
-                     id="{{ field.id_for_label }}" 
-                     name="{{ field.name }}" 
-                     value="{{ field.value|default_if_none:'' }}"
-                     placeholder="{{ field.field.widget.attrs.placeholder|default:'' }}">
+              <input 
+                type="{{ field.field.widget.input_type }}" 
+                class="form-control {% if field.errors %}is-invalid{% endif %}" 
+                id="{{ field.id_for_label }}" 
+                name="{{ field.name }}" 
+                value="{{ field.value|default_if_none:'' }}"
+                placeholder="{{ field.field.widget.attrs.placeholder|default:'' }}"
+                {% if field.field.required %}required{% endif %}>
             {% endif %}
+            
             {% if field.help_text %}
               <small class="form-text text-muted">{{ field.help_text }}</small>
             {% endif %}
-            {% for error in field.errors %}
-              <div class="invalid-feedback d-block">{{ error }}</div>
-            {% endfor %}
+            
+            {% if field.errors %}
+              {% for error in field.errors %}
+                <div class="invalid-feedback">
+                  <i class="fas fa-exclamation-circle me-1"></i> {{ error }}
+                </div>
+              {% endfor %}
+            {% endif %}
           </div>
           {% endfor %}
           
@@ -253,7 +403,35 @@
   document.querySelectorAll('input[type="file"]').forEach(input => {
     input.addEventListener('change', function(e) {
       const fileName = e.target.files[0] ? e.target.files[0].name : 'Choose file';
-      this.nextElementSibling.textContent = fileName;
+      const label = this.nextElementSibling;
+      label.textContent = fileName;
+      
+      // Add/remove invalid class based on validation
+      if (this.required && !fileName) {
+        label.classList.add('is-invalid');
+      } else {
+        label.classList.remove('is-invalid');
+      }
+    });
+  });
+  
+  // Auto-hide alerts after 5 seconds
+  setTimeout(() => {
+    document.querySelectorAll('.alert').forEach(alert => {
+      alert.style.transition = 'all 0.3s ease';
+      alert.style.opacity = '0';
+      setTimeout(() => alert.remove(), 300);
+    });
+  }, 5000);
+  
+  // Real-time validation for required fields
+  document.querySelectorAll('[required]').forEach(field => {
+    field.addEventListener('blur', function() {
+      if (!this.value && this.required) {
+        this.classList.add('is-invalid');
+      } else {
+        this.classList.remove('is-invalid');
+      }
     });
   });
 </script>

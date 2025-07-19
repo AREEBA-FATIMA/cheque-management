@@ -1,7 +1,6 @@
 from django.db import models
 
 STATUS_CHOICES = [
-    ('not_started', 'Not Started'),
     ('in_progress', 'In Progress'),
     ('blocked', 'Blocked'),
     ('completed', 'Completed'),
@@ -26,6 +25,7 @@ class Project(models.Model):
     def __str__(self):
         return self.name
 
+
 class Employee(models.Model):
     name = models.CharField(max_length=100)
     designation = models.CharField(max_length=100)
@@ -33,6 +33,7 @@ class Employee(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.designation} - {self.project.name})"
+
 
 class Cheque(models.Model):
     description = models.CharField(max_length=255)
@@ -44,7 +45,7 @@ class Cheque(models.Model):
 
     status = models.CharField(max_length=50, choices=STATUS_CHOICES)
 
-    # Responsible person details (manual entry)
+    # Responsible person details
     responsible_person_name = models.CharField(max_length=100, verbose_name="Responsible Person Name", default='')
     responsible_person_project = models.ForeignKey(
         Project,
@@ -67,7 +68,7 @@ class Cheque(models.Model):
         null=True
     )
 
-    # Received by person details (manual entry)
+    # Received by person details
     received_by_name = models.CharField(max_length=100, verbose_name="Received By Name", blank=True, null=True, default='')
     received_by_project = models.ForeignKey(
         Project,
@@ -103,9 +104,17 @@ class Cheque(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.cheque_number:
-            last_cheque = Cheque.objects.order_by('id').last()
-            next_number = 90001 if not last_cheque else int(last_cheque.cheque_number.replace('CHK', '')) + 1
-            self.cheque_number = f"CHK{next_number}"
+            prefix = 'CHK'
+            last_cheque = Cheque.objects.filter(cheque_number__startswith=prefix).order_by('-id').first()
+            if last_cheque and last_cheque.cheque_number.startswith(prefix):
+                try:
+                    last_number = int(last_cheque.cheque_number.replace(prefix, ''))
+                    next_number = last_number + 1
+                except ValueError:
+                    next_number = 90001
+            else:
+                next_number = 90001
+            self.cheque_number = f"{prefix}{next_number}"
         super().save(*args, **kwargs)
 
     def __str__(self):

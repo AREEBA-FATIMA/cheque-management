@@ -29,6 +29,61 @@
       color: var(--dark);
     }
     
+    /* Notification System */
+    .notification-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1100;
+      max-width: 400px;
+      width: 100%;
+    }
+    
+    .notification {
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      animation: slideIn 0.3s ease forwards;
+      transform: translateX(150%);
+      opacity: 0;
+      border-left: 5px solid;
+    }
+    
+    .notification.success {
+      background: rgba(102, 187, 106, 0.9);
+      border-left-color: var(--success);
+      color: white;
+    }
+    
+    .notification.error {
+      background: rgba(239, 83, 80, 0.9);
+      border-left-color: var(--danger);
+      color: white;
+    }
+    
+    .notification.warning {
+      background: rgba(255, 167, 38, 0.9);
+      border-left-color: var(--warning);
+      color: var(--dark);
+    }
+    
+    @keyframes slideIn {
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes slideOut {
+      to {
+        transform: translateX(150%);
+        opacity: 0;
+      }
+    }
+    
     /* Glassmorphism Header */
     .dashboard-header {
       background: rgba(255, 255, 255, 0.85);
@@ -196,16 +251,127 @@
       font-size: 0.9rem;
     }
     
-    /* Hidden State */
-    .hidden {
-      transform: scale(0.9);
-      opacity: 0;
-      height: 0;
-      padding: 0;
-      margin: 0;
-      border: 0;
+    /* Empty State - Updated */
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 2rem 1.5rem;
+      background: rgba(255,255,255,0.95);
+      border-radius: 16px;
+      box-shadow: 0 4px 30px rgba(94, 53, 177, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(5px);
+      margin: 1rem auto;
+      max-width: 380px;
+      width: 100%;
+      transform: translateY(0);
       transition: all 0.4s ease;
-      pointer-events: none;
+    }
+    
+    .empty-state i {
+      font-size: 2.5rem;
+      color: var(--primary-light);
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .empty-state h3 {
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+      font-size: 1.25rem;
+    }
+    
+    .empty-state p {
+      color: #78909c;
+      margin-bottom: 1.5rem;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    
+    /* Enhanced Reset Filters Button */
+    .btn-reset-filters {
+      background: #ffffffe6;
+      border: 2px solid var(--primary-light);
+      color: var(--primary);
+      font-weight: 600;
+      padding: 0.6rem 1.5rem;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 10px rgba(94, 53, 177, 0.1);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+    }
+    
+    .btn-reset-filters i {
+      font-size: 0.9em;
+      margin: 0.5rem;
+      background: none;
+      -webkit-text-fill-color: currentColor;
+      align-items: center;
+    }
+    
+    .btn-reset-filters:hover {
+      background: var(--primary-light);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(94, 53, 177, 0.2);
+    }
+    
+    .btn-reset-filters:active {
+      transform: translateY(0);
+    }
+
+    /* Date Filter Styles */
+    .date-filter-container {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+    }
+    
+    .date-filter-btn {
+      border: 1px solid rgba(0,0,0,0.1);
+      background: white;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .date-filter-btn:hover {
+      background: rgba(94, 53, 177, 0.05);
+      border-color: var(--primary-light);
+    }
+    
+    .date-filter-btn.active {
+      background: var(--primary-light);
+      color: white;
+      border-color: var(--primary-light);
+    }
+    
+    .date-range-picker {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+    
+    .date-range-picker input {
+      border: 1px solid rgba(0,0,0,0.1);
+      border-radius: 8px;
+      padding: 0.5rem;
+      font-size: 0.85rem;
+      max-width: 120px;
+    }
+    
+    .date-range-divider {
+      color: #78909c;
     }
     
     /* Responsive Grid */
@@ -219,6 +385,18 @@
   </style>
 </head>
 <body>
+<!-- Notification Container -->
+<div class="notification-container">
+  {% if messages %}
+    {% for message in messages %}
+    <div class="notification {{ message.tags }}">
+      <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %} me-2"></i>
+      <div>{{ message }}</div>
+    </div>
+    {% endfor %}
+  {% endif %}
+</div>
+
 <div class="container py-5">
   <div class="dashboard-header">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -233,7 +411,7 @@
 
     <!-- Premium Filters -->
     <div class="row g-3">
-      <div class="col-md-4">
+      <div class="col-md-3">
         <label class="form-label fw-medium text-primary">Project</label>
         <select id="projectFilter" class="form-select">
           <option value="all" selected>All Projects</option>
@@ -242,7 +420,7 @@
           {% endfor %}
         </select>
       </div>
-      <div class="col-md-4">
+      <div class="col-md-2">
         <label class="form-label fw-medium text-primary">Status</label>
         <select id="statusFilter" class="form-select">
           <option value="all" selected>All Statuses</option>
@@ -252,7 +430,7 @@
           <option value="completed">Completed</option>
         </select>
       </div>
-      <div class="col-md-4">
+      <div class="col-md-2">
         <label class="form-label fw-medium text-primary">Approved By</label>
         <select id="approverFilter" class="form-select">
           <option value="all" selected>All Approvers</option>
@@ -262,81 +440,237 @@
           <option value="Abdullah">Abdullah</option>
         </select>
       </div>
+      <div class="col-md-5">
+        <label class="form-label fw-medium text-primary">Date</label>
+        <div class="date-filter-container">
+          <button class="date-filter-btn active" data-filter="all">All Dates</button>
+          <button class="date-filter-btn" data-filter="today">Today</button>
+          <button class="date-filter-btn" data-filter="yesterday">Yesterday</button>
+          <button class="date-filter-btn" data-filter="this_week">This Week</button>
+          <div class="date-range-picker">
+            <input type="date" id="startDate" class="form-control">
+            <span class="date-range-divider">to</span>
+            <input type="date" id="endDate" class="form-control">
+            <button class="btn btn-sm btn-premium ms-2" id="applyDateRange">Apply</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- Premium Cheque Cards -->
   <div class="cheque-grid" id="chequeContainer">
-    {% for cheque in cheques %}
-    <a href="{% url 'cheque_detail' cheque.id %}" style="text-decoration:none;color:inherit;">
-    <div class="cheque-card mb-4 {{ cheque.status }}" 
-         data-project="{{ cheque.project.name }}"
-         data-status="{{ cheque.status }}"
-         data-approver="{{ cheque.approved_by }}">
-      <div class="card-body p-4 position-relative">
-        <div class="status-ribbon"></div>
-        <div class="d-flex justify-content-between align-items-start mb-3">
-          <h5 class="card-title fw-bold mb-0" style="max-width: 70%;">{{ cheque.description }}</h5>
-          <span class="status-badge badge-{{ cheque.status }}">
-            {{ cheque.get_status_display }}
-          </span>
-        </div>
-        
-        <p class="card-text">
-          <span class="amount-display">Rs. {{ cheque.amount }}</span><br>
-          <small class="text-muted">Cheque #{{ cheque.cheque_number }}</small>
-        </p>
-        
-        <div class="d-flex flex-wrap mt-3 pt-2 border-top">
-          <div class="meta-item">
-            <i class="fas fa-layer-group"></i>
-            <span>{{ cheque.project.name }}</span>
+    {% if cheques %}
+      {% for cheque in cheques %}
+      <a href="{% url 'cheque_detail' cheque.id %}" style="text-decoration:none;color:inherit;">
+      <div class="cheque-card mb-4 {{ cheque.status }}" 
+           data-project="{{ cheque.project.name }}"
+           data-status="{{ cheque.status }}"
+           data-approver="{{ cheque.approved_by }}"
+           data-cheque-date="{{ cheque.cheque_date|date:'Y-m-d' }}">
+        <div class="card-body p-4 position-relative">
+          <div class="status-ribbon"></div>
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <h5 class="card-title fw-bold mb-0" style="max-width: 70%;">{{ cheque.description }}</h5>
+            <span class="status-badge badge-{{ cheque.status }}">
+              {{ cheque.get_status_display }}
+            </span>
           </div>
-          <div class="meta-item">
-            <i class="fas fa-user-tie"></i>
-            <span>{{ cheque.approved_by }}</span>
-          </div>
-          <div class="meta-item">
-            <i class="fas fa-calendar-alt"></i>
-            <span>{{ cheque.cheque_date }}</span>
+          
+          <p class="card-text">
+            <span class="amount-display">Rs. {{ cheque.amount }}</span><br>
+            <small class="text-muted">Cheque #{{ cheque.cheque_number }}</small>
+          </p>
+          
+          <div class="d-flex flex-wrap mt-3 pt-2 border-top">
+            <div class="meta-item">
+              <i class="fas fa-layer-group"></i>
+              <span>{{ cheque.project.name }}</span>
+            </div>
+            <div class="meta-item">
+              <i class="fas fa-user-tie"></i>
+              <span>{{ cheque.approved_by }}</span>
+            </div>
+            <div class="meta-item">
+              <i class="fas fa-calendar-alt"></i>
+              <span>{{ cheque.cheque_date }}</span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    </a>
-    {% endfor %}
+      </a>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <i class="fas fa-file-invoice-dollar"></i>
+        <h3>No Cheques Found</h3>
+        <p>Create your first cheque to get started</p>
+        <a href="{% url 'add_cheque' %}" class="btn btn-premium">
+          <i class="fas fa-plus-circle me-2"></i>Add New Cheque
+        </a>
+      </div>
+    {% endif %}
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // Notification handling
+    const notifications = document.querySelectorAll('.notification');
+    notifications.forEach(notification => {
+      // Show notification
+      setTimeout(() => {
+        notification.style.transform = 'translateX(0)';
+        notification.style.opacity = '1';
+      }, 100);
+      
+      // Auto-dismiss after 5 seconds
+      setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease forwards';
+        setTimeout(() => notification.remove(), 300);
+      }, 5000);
+    });
+    
+    // Filter functionality
     const filters = {
       project: document.getElementById('projectFilter'),
       status: document.getElementById('statusFilter'),
       approver: document.getElementById('approverFilter')
     };
     
-    const chequeCards = document.querySelectorAll('.cheque-card');
+    // Date Filter Elements
+    const dateFilterBtns = document.querySelectorAll('.date-filter-btn');
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+    const applyDateRangeBtn = document.getElementById('applyDateRange');
     
+    let currentDateFilter = 'all';
+    let dateRange = { start: null, end: null };
+    
+    const chequeCards = document.querySelectorAll('.cheque-card');
+    const chequeContainer = document.getElementById('chequeContainer');
+    
+    // Function to format date as YYYY-MM-DD
+    function formatDate(date) {
+      const d = new Date(date);
+      let month = '' + (d.getMonth() + 1);
+      let day = '' + d.getDate();
+      const year = d.getFullYear();
+      
+      if (month.length < 2) month = '0' + month;
+      if (day.length < 2) day = '0' + day;
+      
+      return [year, month, day].join('-');
+    }
+    
+    // Function to get dates for filters
+    function getFilterDates(filter) {
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      
+      const thisWeekStart = new Date(today);
+      thisWeekStart.setDate(today.getDate() - today.getDay()); // Start of week (Sunday)
+      
+      const thisWeekEnd = new Date(today);
+      thisWeekEnd.setDate(today.getDate() + (6 - today.getDay())); // End of week (Saturday)
+      
+      switch(filter) {
+        case 'today':
+          return { start: formatDate(today), end: formatDate(today) };
+        case 'yesterday':
+          return { start: formatDate(yesterday), end: formatDate(yesterday) };
+        case 'this_week':
+          return { start: formatDate(thisWeekStart), end: formatDate(thisWeekEnd) };
+        default:
+          return { start: null, end: null };
+      }
+    }
+    
+    // Date filter button click handler
+    dateFilterBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        dateFilterBtns.forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        currentDateFilter = this.dataset.filter;
+        dateRange = getFilterDates(currentDateFilter);
+        
+        if (currentDateFilter !== 'custom') {
+          applyFilters();
+        }
+      });
+    });
+    
+    // Apply date range handler
+    applyDateRangeBtn.addEventListener('click', function() {
+      if (startDateInput.value && endDateInput.value) {
+        dateFilterBtns.forEach(b => b.classList.remove('active'));
+        currentDateFilter = 'custom';
+        dateRange = { 
+          start: startDateInput.value, 
+          end: endDateInput.value 
+        };
+        applyFilters();
+      } else {
+        alert('Please select both start and end dates');
+      }
+    });
+    
+    // Update filter function to include date filtering
     function applyFilters() {
       const filtersActive = {
         project: filters.project.value !== 'all',
         status: filters.status.value !== 'all',
-        approver: filters.approver.value !== 'all'
+        approver: filters.approver.value !== 'all',
+        date: currentDateFilter !== 'all'
       };
+      
+      let visibleCount = 0;
       
       chequeCards.forEach(card => {
         const matchesProject = !filtersActive.project || card.dataset.project === filters.project.value;
         const matchesStatus = !filtersActive.status || card.dataset.status === filters.status.value;
         const matchesApprover = !filtersActive.approver || card.dataset.approver === filters.approver.value;
         
-        if (matchesProject && matchesStatus && matchesApprover) {
-          card.classList.remove('hidden');
+        // Date filtering
+        let matchesDate = true;
+        if (filtersActive.date) {
+          const chequeDate = card.dataset.chequeDate;
+          if (chequeDate) {
+            matchesDate = chequeDate >= dateRange.start && chequeDate <= dateRange.end;
+          } else {
+            matchesDate = false;
+          }
+        }
+        
+        if (matchesProject && matchesStatus && matchesApprover && matchesDate) {
+          card.style.display = 'block';
+          visibleCount++;
         } else {
-          card.classList.add('hidden');
+          card.style.display = 'none';
         }
       });
+      
+      // Handle empty state for filtered results
+      const existingEmptyState = chequeContainer.querySelector('.empty-state.filtered');
+      if (visibleCount === 0 && chequeCards.length > 0) {
+        if (!existingEmptyState) {
+          const emptyStateHTML = `
+            <div class="empty-state filtered">
+              <i class="fas fa-search"></i>
+              <h3>No Matching Cheques</h3>
+              <p>Your filters didn't match any cheques. Try adjusting your criteria.</p>
+              <button class="btn btn-reset-filters" onclick="resetFilters()">
+                <i class="fas fa-sync-alt me-1"></i> Reset All Filters
+              </button>
+            </div>
+          `;
+          chequeContainer.insertAdjacentHTML('afterbegin', emptyStateHTML);
+        }
+      } else {
+        existingEmptyState?.remove();
+      }
     }
     
     // Add event listeners
@@ -344,9 +678,55 @@
       filter.addEventListener('change', applyFilters);
     });
     
+    // Initialize date inputs with today's date
+    const today = formatDate(new Date());
+    startDateInput.value = today;
+    endDateInput.value = today;
+    
     // Initialize
     applyFilters();
   });
+  
+  // Reset filters function
+  function resetFilters() {
+    document.getElementById('projectFilter').value = 'all';
+    document.getElementById('statusFilter').value = 'all';
+    document.getElementById('approverFilter').value = 'all';
+    
+    // Reset date filter
+    document.querySelector('.date-filter-btn[data-filter="all"]').click();
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    document.getElementById('startDate').value = formatDate(today);
+    document.getElementById('endDate').value = formatDate(today);
+    
+    // Trigger the filter change events
+    const event = new Event('change');
+    document.getElementById('projectFilter').dispatchEvent(event);
+    document.getElementById('statusFilter').dispatchEvent(event);
+    document.getElementById('approverFilter').dispatchEvent(event);
+    
+    // Smooth scroll to top
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }
+
+  // Helper function to format date as YYYY-MM-DD
+  function formatDate(date) {
+    const d = new Date(date);
+    let month = '' + (d.getMonth() + 1);
+    let day = '' + d.getDate();
+    const year = d.getFullYear();
+    
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+    
+    return [year, month, day].join('-');
+  }
 </script>
 </body>
 </html>
