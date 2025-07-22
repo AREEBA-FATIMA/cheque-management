@@ -56,11 +56,19 @@ def custom_logout(request):
 def edit_cheque(request, cheque_id):
     cheque = get_object_or_404(Cheque, id=cheque_id)
     if request.method == 'POST':
-        form = ChequeForm(request.POST, instance=cheque)
+        form = ChequeForm(request.POST, request.FILES, instance=cheque)
         if form.is_valid():
             form.save()
             messages.success(request, 'Cheque updated successfully!')
             return redirect('cheque_detail', cheque_id=cheque.id)
+        else:
+            # Add all form errors to messages
+            for field, errors in form.errors.items():
+                for error in errors:
+                    if field == '__all__':
+                        messages.error(request, error)
+                    else:
+                        messages.error(request, f"{form.fields[field].label}: {error}")
     else:
         form = ChequeForm(instance=cheque)
     return render(request, 'edit_cheque.html', {'form': form, 'cheque': cheque})

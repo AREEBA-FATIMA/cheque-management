@@ -326,16 +326,25 @@
       transform: translateY(0);
     }
 
-    /* Date Filter Styles */
+    /* Enhanced Date Filter Styles */
+    .date-filter-section {
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-top: 1.5rem;
+      box-shadow: 0 4px 15px rgba(94, 53, 177, 0.05);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
     .date-filter-container {
       display: flex;
       gap: 0.75rem;
       flex-wrap: wrap;
-      margin-top: 0.5rem;
+      align-items: center;
     }
     
     .date-filter-btn {
-      border: 1px solid rgba(0,0,0,0.1);
+      border: 1px solid rgba(94, 53, 177, 0.2);
       background: white;
       padding: 0.5rem 1rem;
       border-radius: 8px;
@@ -343,6 +352,7 @@
       font-weight: 500;
       cursor: pointer;
       transition: all 0.2s ease;
+      color: var(--primary);
     }
     
     .date-filter-btn:hover {
@@ -354,24 +364,41 @@
       background: var(--primary-light);
       color: white;
       border-color: var(--primary-light);
+      box-shadow: 0 2px 8px rgba(94, 53, 177, 0.2);
     }
     
     .date-range-picker {
       display: flex;
-      gap: 0.75rem;
+      gap: 4rem;
       align-items: center;
+      flex-wrap: wrap;
     }
     
     .date-range-picker input {
-      border: 1px solid rgba(0,0,0,0.1);
+      border: 1px solid rgba(94, 53, 177, 0.2);
       border-radius: 8px;
-      padding: 0.5rem;
+      padding: 0.5rem 0.75rem;
       font-size: 0.85rem;
-      max-width: 120px;
+      width: 250px;
+      background: white;
+      color: var(--dark);
+    }
+    
+    .date-range-picker input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(94, 53, 177, 0.1);
     }
     
     .date-range-divider {
-      color: #78909c;
+      color: var(--primary-light);
+      font-weight: 500;
+    }
+    
+    .date-filter-label {
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+      display: block;
     }
     
     /* Responsive Grid */
@@ -380,6 +407,16 @@
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
         gap: 1.5rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .date-range-picker {
+        width: 100%;
+      }
+      .date-range-picker input {
+        flex: 1;
+        min-width: 120px;
       }
     }
   </style>
@@ -420,7 +457,7 @@
           {% endfor %}
         </select>
       </div>
-      <div class="col-md-2">
+      <div class="col-md-3">
         <label class="form-label fw-medium text-primary">Status</label>
         <select id="statusFilter" class="form-select">
           <option value="all" selected>All Statuses</option>
@@ -430,7 +467,7 @@
           <option value="completed">Completed</option>
         </select>
       </div>
-      <div class="col-md-2">
+      <div class="col-md-3">
         <label class="form-label fw-medium text-primary">Approved By</label>
         <select id="approverFilter" class="form-select">
           <option value="all" selected>All Approvers</option>
@@ -440,19 +477,32 @@
           <option value="Abdullah">Abdullah</option>
         </select>
       </div>
-      <div class="col-md-5">
-        <label class="form-label fw-medium text-primary">Date</label>
-        <div class="date-filter-container">
-          <button class="date-filter-btn active" data-filter="all">All Dates</button>
-          <button class="date-filter-btn" data-filter="today">Today</button>
-          <button class="date-filter-btn" data-filter="yesterday">Yesterday</button>
-          <button class="date-filter-btn" data-filter="this_week">This Week</button>
+      <div class="col-md-3">
+        <label class="form-label fw-medium text-primary">Date Range</label>
+        <select id="dateRangeFilter" class="form-select">
+          <option value="all" selected>All Dates</option>
+          <option value="today">Today</option>
+          <option value="yesterday">Yesterday</option>
+          <option value="this_week">This Week</option>
+          <option value="custom">Custom Range</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Custom Date Range Picker (hidden by default) -->
+    <div class="date-filter-section mt-3" id="customDateRangeSection" style="display: none;">
+      <div class="row align-items-center">
+        <div class="col-md-8">
           <div class="date-range-picker">
             <input type="date" id="startDate" class="form-control">
             <span class="date-range-divider">to</span>
             <input type="date" id="endDate" class="form-control">
-            <button class="btn btn-sm btn-premium ms-2" id="applyDateRange">Apply</button>
           </div>
+        </div>
+        <div class="col-md-4">
+          <button class="btn btn-premium w-80 m-1" id="applyDateRange">
+            <i class="fas fa-filter me-2"></i>Apply Date Range
+          </button>
         </div>
       </div>
     </div>
@@ -536,11 +586,12 @@
     const filters = {
       project: document.getElementById('projectFilter'),
       status: document.getElementById('statusFilter'),
-      approver: document.getElementById('approverFilter')
+      approver: document.getElementById('approverFilter'),
+      dateRange: document.getElementById('dateRangeFilter')
     };
     
     // Date Filter Elements
-    const dateFilterBtns = document.querySelectorAll('.date-filter-btn');
+    const customDateRangeSection = document.getElementById('customDateRangeSection');
     const startDateInput = document.getElementById('startDate');
     const endDateInput = document.getElementById('endDate');
     const applyDateRangeBtn = document.getElementById('applyDateRange');
@@ -588,24 +639,22 @@
       }
     }
     
-    // Date filter button click handler
-    dateFilterBtns.forEach(btn => {
-      btn.addEventListener('click', function() {
-        dateFilterBtns.forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        currentDateFilter = this.dataset.filter;
+    // Date range filter change handler
+    filters.dateRange.addEventListener('change', function() {
+      currentDateFilter = this.value;
+      
+      if (currentDateFilter === 'custom') {
+        customDateRangeSection.style.display = 'block';
+      } else {
+        customDateRangeSection.style.display = 'none';
         dateRange = getFilterDates(currentDateFilter);
-        
-        if (currentDateFilter !== 'custom') {
-          applyFilters();
-        }
-      });
+        applyFilters();
+      }
     });
     
     // Apply date range handler
     applyDateRangeBtn.addEventListener('click', function() {
       if (startDateInput.value && endDateInput.value) {
-        dateFilterBtns.forEach(b => b.classList.remove('active'));
         currentDateFilter = 'custom';
         dateRange = { 
           start: startDateInput.value, 
@@ -661,72 +710,63 @@
               <i class="fas fa-search"></i>
               <h3>No Matching Cheques</h3>
               <p>Your filters didn't match any cheques. Try adjusting your criteria.</p>
-              <button class="btn btn-reset-filters" onclick="resetFilters()">
+              <button class="btn btn-reset-filters" id="resetFiltersBtn">
                 <i class="fas fa-sync-alt me-1"></i> Reset All Filters
               </button>
             </div>
           `;
           chequeContainer.insertAdjacentHTML('afterbegin', emptyStateHTML);
+          
+          // Add event listener to the reset button
+          document.getElementById('resetFiltersBtn').addEventListener('click', resetFilters);
         }
       } else {
         existingEmptyState?.remove();
       }
     }
     
-    // Add event listeners
-    Object.values(filters).forEach(filter => {
-      filter.addEventListener('change', applyFilters);
-    });
+    // Reset filters function
+    function resetFilters() {
+      filters.project.value = 'all';
+      filters.status.value = 'all';
+      filters.approver.value = 'all';
+      filters.dateRange.value = 'all';
+      
+      // Hide custom date range section
+      customDateRangeSection.style.display = 'none';
+      
+      // Reset date range
+      currentDateFilter = 'all';
+      dateRange = { start: null, end: null };
+      
+      // Reset date inputs to today
+      const today = new Date();
+      startDateInput.value = formatDate(today);
+      endDateInput.value = formatDate(today);
+      
+      // Reapply filters to show all cards
+      applyFilters();
+      
+      // Smooth scroll to top
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+    
+    // Add event listeners to all filters
+    filters.project.addEventListener('change', applyFilters);
+    filters.status.addEventListener('change', applyFilters);
+    filters.approver.addEventListener('change', applyFilters);
     
     // Initialize date inputs with today's date
     const today = formatDate(new Date());
     startDateInput.value = today;
     endDateInput.value = today;
     
-    // Initialize
+    // Initialize filters
     applyFilters();
   });
-  
-  // Reset filters function
-  function resetFilters() {
-    document.getElementById('projectFilter').value = 'all';
-    document.getElementById('statusFilter').value = 'all';
-    document.getElementById('approverFilter').value = 'all';
-    
-    // Reset date filter
-    document.querySelector('.date-filter-btn[data-filter="all"]').click();
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    
-    document.getElementById('startDate').value = formatDate(today);
-    document.getElementById('endDate').value = formatDate(today);
-    
-    // Trigger the filter change events
-    const event = new Event('change');
-    document.getElementById('projectFilter').dispatchEvent(event);
-    document.getElementById('statusFilter').dispatchEvent(event);
-    document.getElementById('approverFilter').dispatchEvent(event);
-    
-    // Smooth scroll to top
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  }
-
-  // Helper function to format date as YYYY-MM-DD
-  function formatDate(date) {
-    const d = new Date(date);
-    let month = '' + (d.getMonth() + 1);
-    let day = '' + d.getDate();
-    const year = d.getFullYear();
-    
-    if (month.length < 2) month = '0' + month;
-    if (day.length < 2) day = '0' + day;
-    
-    return [year, month, day].join('-');
-  }
 </script>
 </body>
 </html>
