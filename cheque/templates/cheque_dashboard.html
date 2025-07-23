@@ -253,7 +253,6 @@
     
     /* Empty State - Updated */
     .empty-state {
-      grid-column: 1 / -1;
       text-align: center;
       padding: 2rem 1.5rem;
       background: rgba(255,255,255,0.95);
@@ -401,22 +400,21 @@
       display: block;
     }
     
-    /* Responsive Grid */
-    @media (min-width: 992px) {
-      .cheque-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-        gap: 1.5rem;
-      }
+    /* Cheque Grid Container - Updated for 2 cards per row */
+    .cheque-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
     }
-
-    @media (max-width: 768px) {
-      .date-range-picker {
-        width: 100%;
-      }
-      .date-range-picker input {
-        flex: 1;
-        min-width: 120px;
+    
+    /* Cheque Card Wrapper - ensures proper sizing */
+    .cheque-card-wrapper {
+      width: 100%;
+    }
+    
+    @media (min-width: 768px) {
+      .cheque-card-wrapper {
+        width: calc(50% - 0.75rem); /* 2 cards per row on all screen sizes */
       }
     }
   </style>
@@ -509,49 +507,51 @@
   </div>
 
   <!-- Premium Cheque Cards -->
-  <div class="cheque-grid" id="chequeContainer">
+  <div class="cheque-container" id="chequeContainer">
     {% if cheques %}
       {% for cheque in cheques %}
-      <a href="{% url 'cheque_detail' cheque.id %}" style="text-decoration:none;color:inherit;">
-      <div class="cheque-card mb-4 {{ cheque.status }}" 
+      <div class="cheque-card-wrapper" 
            data-project="{{ cheque.project.name }}"
            data-status="{{ cheque.status }}"
            data-approver="{{ cheque.approved_by }}"
            data-cheque-date="{{ cheque.cheque_date|date:'Y-m-d' }}">
-        <div class="card-body p-4 position-relative">
-          <div class="status-ribbon"></div>
-          <div class="d-flex justify-content-between align-items-start mb-3">
-            <h5 class="card-title fw-bold mb-0" style="max-width: 70%;">{{ cheque.description }}</h5>
-            <span class="status-badge badge-{{ cheque.status }}">
-              {{ cheque.get_status_display }}
-            </span>
+        <a href="{% url 'cheque_detail' cheque.id %}" style="text-decoration:none;color:inherit;">
+          <div class="cheque-card mb-4 {{ cheque.status }}">
+            <div class="card-body p-4 position-relative">
+              <div class="status-ribbon"></div>
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <h5 class="card-title fw-bold mb-0" style="max-width: 70%;">{{ cheque.description }}</h5>
+                <span class="status-badge badge-{{ cheque.status }}">
+                  {{ cheque.get_status_display }}
+                </span>
+              </div>
+              
+              <p class="card-text">
+                <span class="amount-display">Rs. {{ cheque.amount }}</span><br>
+                <small class="text-muted">Cheque #{{ cheque.cheque_number }}</small>
+              </p>
+              
+              <div class="d-flex flex-wrap mt-3 pt-2 border-top">
+                <div class="meta-item">
+                  <i class="fas fa-layer-group"></i>
+                  <span>{{ cheque.project.name }}</span>
+                </div>
+                <div class="meta-item">
+                  <i class="fas fa-user-tie"></i>
+                  <span>{{ cheque.approved_by }}</span>
+                </div>
+                <div class="meta-item">
+                  <i class="fas fa-calendar-alt"></i>
+                  <span>{{ cheque.cheque_date }}</span>
+                </div>
+              </div>
+            </div>
           </div>
-          
-          <p class="card-text">
-            <span class="amount-display">Rs. {{ cheque.amount }}</span><br>
-            <small class="text-muted">Cheque #{{ cheque.cheque_number }}</small>
-          </p>
-          
-          <div class="d-flex flex-wrap mt-3 pt-2 border-top">
-            <div class="meta-item">
-              <i class="fas fa-layer-group"></i>
-              <span>{{ cheque.project.name }}</span>
-            </div>
-            <div class="meta-item">
-              <i class="fas fa-user-tie"></i>
-              <span>{{ cheque.approved_by }}</span>
-            </div>
-            <div class="meta-item">
-              <i class="fas fa-calendar-alt"></i>
-              <span>{{ cheque.cheque_date }}</span>
-            </div>
-          </div>
-        </div>
+        </a>
       </div>
-      </a>
       {% endfor %}
     {% else %}
-      <div class="empty-state">
+      <div class="empty-state" style="width: 100%;">
         <i class="fas fa-file-invoice-dollar"></i>
         <h3>No Cheques Found</h3>
         <p>Create your first cheque to get started</p>
@@ -599,7 +599,7 @@
     let currentDateFilter = 'all';
     let dateRange = { start: null, end: null };
     
-    const chequeCards = document.querySelectorAll('.cheque-card');
+    const chequeWrappers = document.querySelectorAll('.cheque-card-wrapper');
     const chequeContainer = document.getElementById('chequeContainer');
     
     // Function to format date as YYYY-MM-DD
@@ -677,15 +677,15 @@
       
       let visibleCount = 0;
       
-      chequeCards.forEach(card => {
-        const matchesProject = !filtersActive.project || card.dataset.project === filters.project.value;
-        const matchesStatus = !filtersActive.status || card.dataset.status === filters.status.value;
-        const matchesApprover = !filtersActive.approver || card.dataset.approver === filters.approver.value;
+      chequeWrappers.forEach(wrapper => {
+        const matchesProject = !filtersActive.project || wrapper.dataset.project === filters.project.value;
+        const matchesStatus = !filtersActive.status || wrapper.dataset.status === filters.status.value;
+        const matchesApprover = !filtersActive.approver || wrapper.dataset.approver === filters.approver.value;
         
         // Date filtering
         let matchesDate = true;
         if (filtersActive.date) {
-          const chequeDate = card.dataset.chequeDate;
+          const chequeDate = wrapper.dataset.chequeDate;
           if (chequeDate) {
             matchesDate = chequeDate >= dateRange.start && chequeDate <= dateRange.end;
           } else {
@@ -694,19 +694,19 @@
         }
         
         if (matchesProject && matchesStatus && matchesApprover && matchesDate) {
-          card.style.display = 'block';
+          wrapper.style.display = 'block';
           visibleCount++;
         } else {
-          card.style.display = 'none';
+          wrapper.style.display = 'none';
         }
       });
       
       // Handle empty state for filtered results
       const existingEmptyState = chequeContainer.querySelector('.empty-state.filtered');
-      if (visibleCount === 0 && chequeCards.length > 0) {
+      if (visibleCount === 0 && chequeWrappers.length > 0) {
         if (!existingEmptyState) {
           const emptyStateHTML = `
-            <div class="empty-state filtered">
+            <div class="empty-state filtered" style="width: 100%;">
               <i class="fas fa-search"></i>
               <h3>No Matching Cheques</h3>
               <p>Your filters didn't match any cheques. Try adjusting your criteria.</p>
@@ -715,7 +715,7 @@
               </button>
             </div>
           `;
-          chequeContainer.insertAdjacentHTML('afterbegin', emptyStateHTML);
+          chequeContainer.insertAdjacentHTML('beforeend', emptyStateHTML);
           
           // Add event listener to the reset button
           document.getElementById('resetFiltersBtn').addEventListener('click', resetFilters);
@@ -744,8 +744,13 @@
       startDateInput.value = formatDate(today);
       endDateInput.value = formatDate(today);
       
-      // Reapply filters to show all cards
-      applyFilters();
+      // Show all cheque wrappers
+      chequeWrappers.forEach(wrapper => {
+        wrapper.style.display = 'block';
+      });
+      
+      // Remove any filtered empty state
+      chequeContainer.querySelector('.empty-state.filtered')?.remove();
       
       // Smooth scroll to top
       window.scrollTo({
